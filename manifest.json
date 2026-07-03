@@ -1,0 +1,22 @@
+{
+  "name": "小公主的魔法盲盒",
+  "short_name": "魔法盲盒",
+  "description": "每天开6个盲盒，完成学习任务，赢取惊喜奖励",
+  "start_url": "/Users/liqian/盲盒游戏/index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffecd2",
+  "theme_color": "#ff6b6b",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
