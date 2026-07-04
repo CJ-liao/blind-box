@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>🌈 小公主的魔法盲盒</title>
-
-<!-- PWA / iPad 支持 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="魔法盲盒">
@@ -13,620 +11,445 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff6b6b">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'PingFang SC','Microsoft YaHei','Hiragino Sans GB',sans-serif;
+  background:linear-gradient(135deg,#ffecd2,#fcb69f,#ff9a9e,#fecfef);
+  background-size:400% 400%; animation:bgShift 12s ease infinite;
+  min-height:100vh; overflow-x:hidden;
+}
+@keyframes bgShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.app{display:flex;min-height:100vh;max-width:1100px;margin:0 auto}
+.sidebar{
+  width:280px;min-width:240px;background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(10px);border-right:1px solid rgba(255,255,255,0.4);
+  padding:12px;display:flex;flex-direction:column;gap:8px;z-index:10;overflow-y:auto;
+}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px;min-width:0}
+@media(max-width:768px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;min-width:0;max-height:200px;flex-shrink:0;border-right:none;border-bottom:1px solid rgba(255,255,255,0.4);overflow-y:auto;flex-direction:row;flex-wrap:wrap;gap:6px;align-content:flex-start;padding:8px}
+  .sidebar .sb-block{width:auto;flex-shrink:0}
+}
+.sidebar h3{font-size:14px;color:#6b4226;text-align:center;margin:2px 0}
+.sb-date{font-size:12px;color:#b88;text-align:center}
+.sb-item{
+  background:white;border-radius:10px;padding:7px 9px;display:flex;align-items:center;gap:7px;
+  box-shadow:0 1px 6px rgba(0,0,0,0.05);cursor:pointer;border:2px solid transparent;transition:all 0.2s;
+}
+.sb-item.done{border-color:#6bcb77;background:#f5fff5}
+.sb-item .sbi-emoji{font-size:22px;flex-shrink:0}
+.sb-item .sbi-text{font-size:11px;font-weight:700;color:#6b4226;line-height:1.2;white-space:pre-line;flex:1}
+.sb-item .sbi-time{font-size:10px;color:#999;flex-shrink:0}
+.sb-item .sbi-check{font-size:18px;flex-shrink:0}
+.sb-empty{text-align:center;color:#ccc;font-size:12px;padding:10px 0}
+.sb-btn{
+  display:block;width:100%;padding:8px;border-radius:10px;text-align:center;
+  background:rgba(255,255,255,0.6);border:none;font-size:13px;color:#8b5e3c;
+  font-weight:700;cursor:pointer;font-family:inherit;
+}
+.sb-btn:active{background:rgba(255,255,255,0.9)}
 
-  body {
-    font-family: 'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans SC',sans-serif;
-    min-height:100vh;
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 30%, #ff9a9e 60%, #fecfef 100%);
-    background-size: 400% 400%;
-    animation: bgShift 12s ease infinite;
-    overflow-x:hidden;
-    display:flex; flex-direction:column; align-items:center;
-    padding:10px;
-  }
-  @keyframes bgShift {
-    0%,100% { background-position:0% 50%; }
-    50% { background-position:100% 50%; }
-  }
+.header{text-align:center;margin:8px 0 4px}
+.header .title{
+  font-size:clamp(22px,4.5vw,36px);font-weight:900;
+  background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:rainbow 3s linear infinite;line-height:1.3;
+}
+@keyframes rainbow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.header .subtitle{font-size:clamp(11px,2.2vw,15px);color:#8b5e3c;font-weight:700;margin-top:2px}
+.header .tag{display:inline-block;background:#ffe0e0;color:#d44;padding:3px 14px;border-radius:12px;font-size:13px;font-weight:700;margin-top:4px}
 
-  /* Floating decorations */
-  .floating-deco {
-    position:fixed; pointer-events:none; z-index:0; opacity:0.35;
-    animation: floatAround 8s ease-in-out infinite;
-    font-size:38px;
-  }
-  @keyframes floatAround {
-    0%,100% { transform:translateY(0) rotate(0deg); }
-    25% { transform:translateY(-30px) rotate(10deg); }
-    50% { transform:translateY(-10px) rotate(-5deg); }
-    75% { transform:translateY(-40px) rotate(8deg); }
-  }
+.box-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2.3vw,16px);max-width:520px;width:100%;margin:6px auto 10px;padding:0 8px}
+@media(max-width:420px){.box-grid{grid-template-columns:repeat(2,1fr);gap:8px}}
 
-  /* Header */
-  .header {
-    text-align:center; z-index:1; margin:10px 0 6px;
-  }
-  .header .title {
-    font-size:clamp(26px,5.5vw,44px); font-weight:900;
-    background: linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff);
-    background-size:300% 100%;
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    background-clip:text;
-    animation: rainbow 3s linear infinite;
-    line-height:1.3;
-  }
-  @keyframes rainbow {
-    0% { background-position:0% 50%; }
-    100% { background-position:300% 50%; }
-  }
-  .header .subtitle {
-    font-size:clamp(13px,2.5vw,18px); color:#8b5e3c; font-weight:700;
-    margin-top:2px;
-  }
+.box{aspect-ratio:1;perspective:700px;cursor:pointer;transition:transform 0.15s;position:relative}
+.box:hover:not(.done):not(.locked){transform:scale(1.03)}
+.box:active:not(.done):not(.locked){transform:scale(0.96)}
+.box.locked{cursor:not-allowed;filter:brightness(0.85) saturate(0.4)}
+.box.done{pointer-events:none}
+.box-inner{width:100%;height:100%;position:relative;transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);transform-style:preserve-3d;border-radius:18px}
+.box.opened .box-inner,.box.done .box-inner{transform:rotateY(180deg)}
+.face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.face-front{background:linear-gradient(145deg,#fff5f5,#ffe0e0,#ffd4d4);border:3px dashed #ffb3b3;box-shadow:0 5px 20px rgba(0,0,0,0.07)}
+.face-front .gift{font-size:clamp(32px,7vw,52px);animation:bounce 1.5s ease-in-out infinite}
+.face-front .hint{font-size:13px;color:#e88;margin-top:3px;font-weight:900;animation:pulse 1.2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)scale(1)}30%{transform:translateY(-12px)scale(1.1)}60%{transform:translateY(0)scale(0.95)}80%{transform:translateY(-4px)scale(1.05)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+.box:nth-child(6n+1) .face-front{background:linear-gradient(145deg,#fff0f5,#ffd6e7,#ffc2d9);border-color:#ffb3cc}
+.box:nth-child(6n+2) .face-front{background:linear-gradient(145deg,#fff8e8,#ffe8c8,#ffd9a8);border-color:#ffcc88}
+.box:nth-child(6n+3) .face-front{background:linear-gradient(145deg,#f0fff0,#d4f5d4,#b8ebb8);border-color:#99dd99}
+.box:nth-child(6n+4) .face-front{background:linear-gradient(145deg,#f0f5ff,#d4e4ff,#b8d4ff);border-color:#99bbff}
+.box:nth-child(6n+5) .face-front{background:linear-gradient(145deg,#fff5ff,#f0d4ff,#e5b8ff);border-color:#cc99ee}
+.box:nth-child(6n+6) .face-front{background:linear-gradient(145deg,#fffdf0,#fff0c0,#ffe8a0);border-color:#ffdd77}
+.face-back{background:linear-gradient(145deg,#fffdf5,#fff8e8,#fff3d0);border:4px solid #ffd700;transform:rotateY(180deg);padding:4px;text-align:center;box-shadow:0 0 25px rgba(255,215,0,0.25)}
+.face-back .r-emoji{font-size:clamp(26px,5vw,38px)}
+.face-back .r-text{font-size:clamp(9px,1.8vw,12px);font-weight:900;color:#6b4226;margin-top:2px;line-height:1.2;white-space:pre-line}
+.box.done .face-back{border-color:#6bcb77;background:linear-gradient(145deg,#f5fff5,#e8ffe8,#d0ffd0)}
+.box.done::after{content:'✅';position:absolute;top:-6px;right:-4px;font-size:24px;z-index:5;animation:popIn 0.35s cubic-bezier(0.175,0.885,0.32,1.275)}
+@keyframes popIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+.box.shaking .box-inner{animation:shake 0.5s ease-in-out}
+@keyframes shake{0%,100%{transform:rotateY(0)translateX(0)}10%{transform:rotateY(-10deg)translateX(-6px)}20%{transform:rotateY(10deg)translateX(6px)}30%{transform:rotateY(-15deg)translateX(-8px)}40%{transform:rotateY(15deg)translateX(8px)}50%{transform:rotateY(-10deg)translateX(-4px)}60%{transform:rotateY(10deg)translateX(4px)}70%{transform:rotateY(-5deg)translateX(-2px)}80%{transform:rotateY(5deg)translateX(2px)}90%{transform:rotateY(-2deg)translateX(0)}}
 
-  /* Box grid — iPad 3列，小手机2列 */
-  .box-grid {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:clamp(12px,3vw,30px);
-    max-width:750px; width:100%;
-    z-index:1; margin:0 auto 10px;
-    padding:0 12px;
-  }
-  /* iPad 大屏：盒子更大、间距更宽 */
-  @media (min-width:768px) {
-    .box-grid { gap:28px; max-width:800px; }
-    .box-front .question-mark { font-size:clamp(48px,8vw,80px) !important; }
-    .box-front .tap-hint { font-size:16px !important; }
-    .box-back .result-emoji { font-size:clamp(38px,5vw,56px) !important; }
-    .box-back .result-text { font-size:clamp(13px,2vw,16px) !important; }
-    .box-back .result-tag { font-size:11px !important; }
-  }
-  @media (max-width:420px) {
-    .box-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
-  }
+.confetti{position:fixed;pointer-events:none;z-index:100;animation:cf 1.8s ease-out forwards}
+@keyframes cf{0%{transform:translateY(-120px)rotate(0deg)scale(1);opacity:1}70%{opacity:1}100%{transform:translateY(105vh)rotate(720deg)scale(0.3);opacity:0}}
+.spark{position:fixed;pointer-events:none;z-index:101;animation:sp 0.9s ease-out forwards;font-size:22px}
+@keyframes sp{0%{transform:translate(0,0)scale(0);opacity:1}100%{transform:translate(var(--dx),var(--dy))scale(1.5);opacity:0}}
 
-  /* Blind box card */
-  .box-card {
-    aspect-ratio:1;
-    perspective:800px;
-    cursor:pointer;
-    transition:transform 0.15s;
-  }
-  .box-card:hover:not(.used):not(.locked) { transform:scale(1.03); }
-  .box-card:active:not(.used):not(.locked) { transform:scale(0.96); }
-  .box-card.locked { cursor:not-allowed; filter:brightness(0.85) saturate(0.4); }
-  .box-card.locked .box-front { border-color:#ddd !important; }
-  .box-card.locked .question-mark { filter:grayscale(0.7) opacity(0.5); }
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:90;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.25s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.popup{background:white;border-radius:24px;padding:25px 20px;text-align:center;max-width:320px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popCard 0.4s cubic-bezier(0.175,0.885,0.32,1.275)}
+@keyframes popCard{0%{transform:scale(0.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.popup .o-emoji{font-size:64px;display:block}
+.popup .o-text{font-size:20px;font-weight:900;color:#6b4226;margin:8px 0;white-space:pre-line;line-height:1.4}
+.popup .o-note{font-size:13px;color:#999;margin-bottom:12px}
+.popup .o-timer{font-size:36px;font-weight:900;color:#6bcb77;margin:8px 0;font-variant-numeric:tabular-nums}
+.popup .btn{
+  display:block;width:100%;padding:14px;border-radius:30px;border:none;font-size:18px;font-weight:900;
+  cursor:pointer;font-family:inherit;margin:6px 0;color:white;transition:transform 0.15s;
+}
+.popup .btn:active{transform:scale(0.93)}
+.btn-start{background:linear-gradient(135deg,#ff8e53,#ff6b6b);box-shadow:0 6px 20px rgba(255,107,107,0.35)}
+.btn-later{background:#ddd;color:#999;box-shadow:none}
+.btn-done{background:linear-gradient(135deg,#6bcb77,#4caf50);box-shadow:0 6px 20px rgba(107,203,119,0.35)}
 
-  .box-inner {
-    width:100%; height:100%;
-    position:relative; transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);
-    transform-style:preserve-3d;
-    border-radius:20px;
-  }
-  .box-card.opened .box-inner { transform:rotateY(180deg); }
-
-  .box-front, .box-back {
-    position:absolute; width:100%; height:100%;
-    backface-visibility:hidden; border-radius:20px;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-  }
-  .box-front {
-    background:linear-gradient(145deg,#fff5f5,#ffe0e0,#ffd4d4);
-    border:3px dashed #ffb3b3;
-    box-shadow:0 6px 25px rgba(0,0,0,0.08);
-  }
-  .box-front .question-mark {
-    font-size:clamp(36px,9vw,64px); font-weight:900;
-    color:#ff6b6b; text-shadow:2px 2px 0 #ffd4d4;
-    animation: bounceQM 1.5s ease-in-out infinite;
-  }
-  @keyframes bounceQM {
-    0%,100%{transform:translateY(0) scale(1)}
-    30%{transform:translateY(-14px) scale(1.1)}
-    60%{transform:translateY(0) scale(0.95)}
-    80%{transform:translateY(-5px) scale(1.05)}
-  }
-  .box-front .tap-hint {
-    font-size:14px; color:#e88; margin-top:4px; font-weight:900;
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-
-  /* Box colors - pastel rainbow */
-  .box-card:nth-child(1) .box-front{background:linear-gradient(145deg,#fff0f5,#ffd6e7,#ffc2d9);border-color:#ffb3cc}
-  .box-card:nth-child(2) .box-front{background:linear-gradient(145deg,#fff8e8,#ffe8c8,#ffd9a8);border-color:#ffcc88}
-  .box-card:nth-child(3) .box-front{background:linear-gradient(145deg,#f0fff0,#d4f5d4,#b8ebb8);border-color:#99dd99}
-  .box-card:nth-child(4) .box-front{background:linear-gradient(145deg,#f0f5ff,#d4e4ff,#b8d4ff);border-color:#99bbff}
-  .box-card:nth-child(5) .box-front{background:linear-gradient(145deg,#fff5ff,#f0d4ff,#e5b8ff);border-color:#cc99ee}
-  .box-card:nth-child(6) .box-front{background:linear-gradient(145deg,#fffdf0,#fff0c0,#ffe8a0);border-color:#ffdd77}
-
-  .box-back {
-    background:linear-gradient(145deg,#fffdf5,#fff8e8,#fff3d0);
-    border:4px solid #ffd700;
-    transform:rotateY(180deg);
-    padding:8px; text-align:center;
-    box-shadow:0 0 35px rgba(255,215,0,0.35);
-  }
-  .box-back .result-emoji { font-size:clamp(30px,7vw,48px); }
-  .box-back .result-text {
-    font-size:clamp(10px,2.2vw,14px); font-weight:900;
-    color:#6b4226; margin-top:2px; line-height:1.3;
-    white-space:pre-line;
-  }
-  .box-back .result-tag {
-    font-size:9px; padding:2px 8px; border-radius:10px;
-    margin-top:4px; font-weight:700;
-  }
-  .tag-learn{background:#ffe0e0;color:#d44}
-  .tag-fun{background:#e0f0ff;color:#48c}
-  .tag-reward{background:#fff0d0;color:#e8a010}
-  .tag-big{background:#ffd700;color:#c00;font-size:10px}
-
-  /* Completed checkmark overlay */
-  .box-card.done::after {
-    content:'✅'; position:absolute; top:-6px; right:-6px;
-    font-size:26px; z-index:5;
-    animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-  }
-  @keyframes popIn {
-    0%{transform:scale(0);opacity:0}
-    100%{transform:scale(1);opacity:1}
-  }
-
-  /* Shaking */
-  .box-card.shaking .box-inner {
-    animation: shake 0.5s ease-in-out;
-  }
-  @keyframes shake {
-    0%,100%{transform:rotateY(0) translateX(0)}
-    10%{transform:rotateY(-10deg) translateX(-6px)}
-    20%{transform:rotateY(10deg) translateX(6px)}
-    30%{transform:rotateY(-15deg) translateX(-8px)}
-    40%{transform:rotateY(15deg) translateX(8px)}
-    50%{transform:rotateY(-10deg) translateX(-4px)}
-    60%{transform:rotateY(10deg) translateX(4px)}
-    70%{transform:rotateY(-5deg) translateX(-2px)}
-    80%{transform:rotateY(5deg) translateX(2px)}
-    90%{transform:rotateY(-2deg) translateX(0)}
-  }
-
-  /* Confetti */
-  .confetti-piece {
-    position:fixed; pointer-events:none; z-index:100;
-    animation: confettiFall 1.8s ease-out forwards;
-  }
-  @keyframes confettiFall {
-    0%{transform:translateY(-120px) rotate(0deg) scale(1);opacity:1}
-    70%{opacity:1}
-    100%{transform:translateY(105vh) rotate(720deg) scale(0.3);opacity:0}
-  }
-  .sparkle-burst {
-    position:fixed; pointer-events:none; z-index:101;
-    animation: burstOut 0.9s ease-out forwards;
-    font-size:26px;
-  }
-  @keyframes burstOut {
-    0%{transform:translate(0,0) scale(0);opacity:1}
-    100%{transform:translate(var(--dx),var(--dy)) scale(1.5);opacity:0}
-  }
-
-  /* Overlay */
-  .overlay {
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.5); z-index:90;
-    display:flex; align-items:center; justify-content:center;
-    animation: fadeIn 0.25s ease;
-  }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  .overlay-card {
-    background:white; border-radius:26px; padding:25px 20px;
-    text-align:center; max-width:320px; width:90%;
-    box-shadow:0 20px 60px rgba(0,0,0,0.3);
-    animation: popInCard 0.45s cubic-bezier(0.175,0.885,0.32,1.275);
-  }
-  @keyframes popInCard {
-    0%{transform:scale(0.3);opacity:0}
-    100%{transform:scale(1);opacity:1}
-  }
-  .overlay-card .big-emoji { font-size:72px; display:block; }
-  .overlay-card .big-text {
-    font-size:22px; font-weight:900; color:#6b4226; margin:8px 0;
-    white-space:pre-line; line-height:1.4;
-  }
-  .overlay-card .big-note {
-    font-size:14px; color:#999; margin-bottom:14px;
-  }
-  .overlay-card .btn-done {
-    background:linear-gradient(135deg,#6bcb77,#4caf50);
-    border:none; color:white; font-size:20px; font-weight:900;
-    padding:14px 40px; border-radius:30px; cursor:pointer;
-    box-shadow:0 6px 20px rgba(107,203,119,0.4);
-    transition:transform 0.15s;
-    font-family:inherit; display:block; width:100%;
-  }
-  .overlay-card .btn-done:active { transform:scale(0.93); }
-
-  /* Scrolling ticker */
-  .ticker-wrap {
-    width:100%; max-width:650px; overflow:hidden; z-index:1;
-    background:rgba(255,255,255,0.55); backdrop-filter:blur(8px);
-    border-radius:18px; padding:10px 0; margin:6px 0 10px;
-    box-shadow:0 2px 12px rgba(0,0,0,0.06); position:relative;
-  }
-  .ticker-label {
-    text-align:center; font-size:12px; color:#b88; font-weight:700;
-    margin-bottom:4px;
-  }
-  .ticker-track {
-    display:flex; animation: scroll 30s linear infinite; gap:16px;
-    padding:0 16px;
-  }
-  @keyframes scroll {
-    0% { transform:translateX(0); }
-    100% { transform:translateX(-50%); }
-  }
-  .ticker-item {
-    flex-shrink:0; display:flex; flex-direction:column;
-    align-items:center; font-size:12px; font-weight:700;
-    color:#6b4226; min-width:48px;
-  }
-  .ticker-item .t-emoji { font-size:26px; }
-  .ticker-item .t-text { font-size:9px; text-align:center; white-space:pre-line; line-height:1.2; }
-
-  /* Reset button */
-  .reset-btn {
-    position:fixed; bottom:18px; right:18px; z-index:10;
-    background:rgba(255,255,255,0.8); border:none;
-    font-size:26px; width:48px; height:48px; border-radius:24px;
-    cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,0.1);
-    transition:transform 0.2s;
-  }
-  .reset-btn:hover { transform:scale(1.1) rotate(30deg); }
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:95;display:flex;align-items:center;justify-content:center}
+.panel{background:white;border-radius:18px;padding:18px;max-width:400px;width:90%;max-height:75vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.panel h3{text-align:center;color:#6b4226;margin-bottom:10px}
+.panel .day-block{margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:6px}
+.panel .day-date{font-size:13px;font-weight:900;color:#b88;margin-bottom:3px}
+.panel .day-items{display:flex;flex-wrap:wrap;gap:3px}
+.panel .day-item{font-size:10px;background:#f5f5f5;padding:2px 7px;border-radius:7px;color:#666}
+.panel .day-item.ok{background:#e8ffe8;color:#4a4}
+.panel .close-btn{display:block;width:100%;margin-top:8px;padding:10px;border-radius:12px;background:#ff6b6b;color:white;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.stat-row{display:flex;align-items:center;gap:8px;margin:5px 0;padding:5px 8px;background:#fafafa;border-radius:8px}
+.stat-row .s-emoji{font-size:20px}
+.stat-row .s-info{flex:1;min-width:0}
+.stat-row .s-name{font-size:11px;font-weight:700;color:#6b4226}
+.stat-row .s-bar{display:flex;align-items:center;gap:5px;margin-top:1px}
+.stat-row .s-bar-bg{flex:1;height:8px;background:#eee;border-radius:4px;overflow:hidden}
+.stat-row .s-bar-fg{height:100%;border-radius:4px}
+.stat-row .s-pct{font-size:9px;color:#999}
 </style>
 </head>
 <body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h3>📋 今日盲盒</h3>
+    <div class="sb-date" id="sbDate"></div>
+    <div id="sbList"><div class="sb-empty">🎁 还没开盲盒哦～</div></div>
+    <button class="sb-btn" onclick="showHistory()">📅 历史记录</button>
+    <button class="sb-btn" onclick="showStats()">📊 学习统计</button>
+  </div>
 
-<!-- Floating decorations -->
-<div class="floating-deco" style="top:6%;left:4%;">🦄</div>
-<div class="floating-deco" style="top:12%;right:5%;animation-delay:1.5s;">⭐</div>
-<div class="floating-deco" style="top:50%;left:2%;animation-delay:3s;">🌈</div>
-<div class="floating-deco" style="top:65%;right:3%;animation-delay:4.5s;">🎀</div>
-<div class="floating-deco" style="bottom:15%;left:6%;animation-delay:6s;">💖</div>
-<div class="floating-deco" style="bottom:8%;right:8%;animation-delay:2s;">🌸</div>
-
-<!-- Header -->
-<div class="header">
-  <div class="title">🎁 小公主的魔法盲盒 🎁</div>
-  <div class="subtitle">✨ 每天打开 6 个盲盒，完成一个才能开下一个 ✨</div>
+  <!-- Main -->
+  <div class="main">
+    <div class="header">
+      <div class="title">🎁 小公主的魔法盲盒</div>
+      <div class="subtitle">✨ 每天 10 个盲盒，完成一个自动刷新 ✨</div>
+      <div class="tag" id="statusTag">🎯 试试手气，看看今天抽到什么！</div>
+    </div>
+    <div class="box-grid" id="grid"></div>
+    <div style="text-align:center;margin-bottom:12px">
+      <button class="sb-btn" style="display:inline;padding:8px 18px;font-size:12px" onclick="resetToday()">🔄 重新抽今天</button>
+    </div>
+  </div>
 </div>
-
-<!-- Box grid -->
-<div class="box-grid" id="boxGrid"></div>
-
-<!-- Scrolling ticker -->
-<div class="ticker-wrap">
-  <div class="ticker-label">🎪 盲盒里都有什么？</div>
-  <div class="ticker-track" id="tickerTrack"></div>
-</div>
-
-<!-- Confetti container -->
-<div id="confetti"></div>
-
-<!-- Reset -->
-<button class="reset-btn" onclick="resetGame()" title="重新开始">🔄</button>
 
 <script>
-// ====================== ACTIVITY POOL ======================
-const activities = [
-  // Learning tasks (weight 6 each → 36/55 ≈ 65%)
-  { emoji:'📖', text:'英语阅读\n15分钟', tag:'学习任务', tagClass:'tag-learn', group:'learn', weight:6 },
-  { emoji:'✏️', text:'看图写话\n一篇小作文', tag:'学习任务', tagClass:'tag-learn', group:'learn', weight:6 },
-  { emoji:'🎹', text:'钢琴练习\n15分钟', tag:'学习任务', tagClass:'tag-learn', group:'learn', weight:6 },
-  { emoji:'🧮', text:'数学口算\n15分钟', tag:'学习任务', tagClass:'tag-learn', group:'learn', weight:6 },
-  { emoji:'📝', text:'古诗词背诵\n一首古诗', tag:'学习任务', tagClass:'tag-learn', group:'learn', weight:6 },
-  { emoji:'📐', text:'做数学题\n20分钟', tag:'学习任务', tagClass:'tag-learn', group:'learn', weight:6 },
-
-  // Fun activities (weight 3 each → 9/55 ≈ 16%)
-  { emoji:'🎨', text:'手工游戏\n创意时间', tag:'趣味活动', tagClass:'tag-fun', group:'fun', weight:3 },
-  { emoji:'👶', text:'陪弟弟玩耍\n30分钟', tag:'趣味活动', tagClass:'tag-fun', group:'fun', weight:3 },
-  { emoji:'🖼️', text:'自由画画\n15分钟', tag:'趣味活动', tagClass:'tag-fun', group:'fun', weight:3 },
-
-  // Rewards — regular (weight 2 each → 6/55 ≈ 11%)
-  { emoji:'📱', text:'看平板\n15分钟', tag:'小惊喜', tagClass:'tag-reward', group:'reward', weight:2 },
-  { emoji:'🎁', text:'奖励\n10元礼物', tag:'小惊喜', tagClass:'tag-reward', group:'reward', weight:2 },
-  { emoji:'💰', text:'奖励\n20元礼物', tag:'小惊喜', tagClass:'tag-reward', group:'reward', weight:2 },
-
-  // Rewards — big (weight 2 → 2/55 ≈ 4%)
-  { emoji:'💎', text:'奖励\n30元礼物', tag:'大惊喜', tagClass:'tag-big', group:'reward', weight:2 },
-
-  // Rewards — rare (weight 1 each → 2/55 ≈ 4%)
-  { emoji:'☕', text:'奖励\n休息半天', tag:'超级惊喜', tagClass:'tag-big', group:'reward', weight:1 },
-  { emoji:'🏖️', text:'奖励\n休息一天', tag:'超级惊喜', tagClass:'tag-big', group:'reward', weight:1 },
-];
-
-// Build weighted pool (total weight = 36+9+6+2+2 = 55)
-const pool = [];
-activities.forEach(a => { for(let i=0;i<a.weight;i++) pool.push(a); });
-
-// ====================== GAME STATE ======================
-const TOTAL_BOXES = 6;
-let currentTaskIndex = -1;   // which box has an active (uncompleted) task
-let completedMask = 0;        // bitmask of completed boxes
-let revealedItems = [];
-let globalLocked = false;     // true while a task popup is showing
-
-// ====================== SHUFFLE & DRAW ======================
-function shuffle(arr) {
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
+// ====================== DATA ======================
+const subjects = {
+  chinese:[
+    {emoji:'✏️',text:'看图写话\n一篇小作文',tag:'语文',w:6},
+    {emoji:'📝',text:'2年级语文书\n背诵与朗读',tag:'语文',w:6},
+    {emoji:'📢',text:'语文课外\n大声朗读10分钟',tag:'语文',w:6},
+    {emoji:'✒️',text:'语文练字帖\n15分钟',tag:'语文',w:6},
+    {emoji:'🎤',text:'出口成章APP\n阅读练习',tag:'语文',w:6},
+  ],
+  english:[
+    {emoji:'📖',text:'英语阅读\n15分钟',tag:'英语',w:6},
+    {emoji:'🔤',text:'26个英语字母\n默写',tag:'英语',w:6},
+    {emoji:'📋',text:'认读核心词汇\n抄写单词5个',tag:'英语',w:6},
+  ],
+  math:[
+    {emoji:'🧮',text:'计算小能手\n15分钟',tag:'数学',w:6},
+    {emoji:'📐',text:'做数学题\n20分钟',tag:'数学',w:6},
+    {emoji:'🔢',text:'背诵\n乘法口诀',tag:'数学',w:6},
+    {emoji:'🧾',text:'背诵乘法表\n10分钟',tag:'数学',w:6},
+    {emoji:'🎯',text:'趣数畅游\n一整夏',tag:'数学',w:6},
+  ],
+  piano:[{emoji:'🎹',text:'钢琴练习\n15分钟',tag:'钢琴',w:6}],
+  fun:[
+    {emoji:'🎨',text:'手工游戏\n创意时间',tag:'趣味',w:3},
+    {emoji:'👶',text:'陪弟弟玩耍\n30分钟',tag:'趣味',w:3},
+    {emoji:'🖼️',text:'自由画画\n15分钟',tag:'趣味',w:3},
+    {emoji:'⚽',text:'户外运动\n30分钟',tag:'趣味',w:3},
+    {emoji:'🦘',text:'Khankids\n15分钟',tag:'趣味',w:3},
+  ],
+  reward:[
+    {emoji:'🎁',text:'奖励\n10元礼物',tag:'惊喜',w:6},
+    {emoji:'📱',text:'看平板\n15分钟',tag:'惊喜',w:3},
+    {emoji:'💰',text:'奖励\n20元礼物',tag:'惊喜',w:2},
+    {emoji:'💎',text:'奖励\n30元礼物',tag:'惊喜',w:1},
+    {emoji:'💵',text:'奖励\n100元礼物',tag:'惊喜',w:1},
+    {emoji:'☕',text:'奖励\n休息半天',tag:'惊喜',w:1},
+    {emoji:'🏖️',text:'奖励\n休息一天',tag:'惊喜',w:1},
+  ],
+};
+function pickW(p){const t=p.reduce((s,a)=>s+a.w,0);let r=Math.random()*t;for(const a of p){r-=a.w;if(r<=0)return a}return p[p.length-1]}
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
+function draw10(){
+  const d=[];
+  d.push(pickW(subjects.chinese));d.push(pickW(subjects.chinese));
+  d.push(pickW(subjects.english));d.push(pickW(subjects.english));
+  d.push(pickW(subjects.math));d.push(pickW(subjects.math));
+  d.push(pickW(subjects.piano));
+  d.push(pickW(subjects.reward));d.push(pickW(subjects.reward));
+  const rest=[...subjects.chinese,...subjects.english,...subjects.math,...subjects.fun];
+  const f=rest.filter(a=>!d.some(x=>x.emoji+x.text===a.emoji+a.text));
+  d.push(f.length>0?pickW(f):pickW(rest));
+  shuf(d); return d;
 }
 
-function drawActivities(n) {
-  const shuffled = [...pool];
-  shuffle(shuffled);
-  const drawn = [];
-  const gc = {learn:0, fun:0, reward:0};
+// ====================== STORAGE ======================
+function tk(){return new Date().toISOString().slice(0,10)}
+function load(d){try{return JSON.parse(localStorage.getItem('bb_'+d))}catch(e){return null}}
+function save(d,v){localStorage.setItem('bb_'+d,JSON.stringify(v))}
+function getToday(){const k=tk();let r=load(k);if(!r)r={date:k,items:[],done:false};return r}
 
-  for (const item of shuffled) {
-    if (drawn.length >= n) break;
-    if (item.group==='learn' && gc.learn>=4) continue;
-    if (item.group==='fun' && gc.fun>=2) continue;
-    if (item.group==='reward' && gc.reward>=2) continue;
-    if (drawn.some(d=>d.text===item.text)) continue;
-    drawn.push(item);
-    gc[item.group]++;
-  }
-  while (drawn.length < n) {
-    const item = shuffled[Math.floor(Math.random()*shuffled.length)];
-    if (!drawn.some(d=>d.text===item.text)) drawn.push(item);
-  }
-  shuffle(drawn);
-  return drawn;
+// ====================== STATE ======================
+const T=10, V=6;
+let items=[], completed=0, current=-1, locked=false, timerSec=0, timerInt=null;
+
+function init(){
+  const rec=getToday();
+  items=rec.items.length===T?rec.items:draw10();
+  completed=0; current=-1; locked=false;
+  items.forEach(t=>{if(t.done){completed|=(1<<items.indexOf(t))}});
+  if(items.every(t=>t.done)) completed=(1<<T)-1;
+  document.getElementById('sbDate').textContent='📅 '+tk();
+  render(); updSidebar(); updStatus();
 }
 
-// ====================== INIT ======================
-function initGame() {
-  currentTaskIndex = -1;
-  completedMask = 0;
-  globalLocked = false;
-  revealedItems = drawActivities(TOTAL_BOXES);
+// ====================== RENDER ======================
+function render(){
+  const g=document.getElementById('grid'); g.innerHTML='';
+  const remain=[];
+  for(let i=0;i<T;i++) if(!(completed&(1<<i))) remain.push(i);
+  shuf(remain);
+  const show=remain.slice(0,V);
+  const doneList=[];
+  for(let i=0;i<T;i++) if(completed&(1<<i)) doneList.push(i);
+  const all=[...doneList.slice(-Math.min(3,doneList.length)),...show].slice(0,V);
 
-  const grid = document.getElementById('boxGrid');
-  grid.innerHTML = '';
-
-  for (let i = 0; i < TOTAL_BOXES; i++) {
-    const card = document.createElement('div');
-    card.className = 'box-card';
-    card.id = `box-${i}`;
-    card.innerHTML = `
-      <div class="box-inner">
-        <div class="box-front">
-          <div class="question-mark">🎁</div>
-          <div class="tap-hint">👆 点我打开</div>
-        </div>
-        <div class="box-back">
-          <div class="result-emoji"></div>
-          <div class="result-text"></div>
-          <div class="result-tag"></div>
-        </div>
-      </div>
-    `;
-    card.addEventListener('click', () => openBox(i, card));
-    grid.appendChild(card);
-  }
-
-  buildTicker();
-  updateLockState();
-}
-
-// ====================== SCROLLING TICKER ======================
-function buildTicker() {
-  const track = document.getElementById('tickerTrack');
-  const items = activities.map(a =>
-    `<div class="ticker-item"><span class="t-emoji">${a.emoji}</span><span class="t-text">${a.text.replace(/\n/g,'<br>')}</span></div>`
-  ).join('');
-  // Duplicate for seamless loop
-  track.innerHTML = items + items;
-}
-
-// ====================== LOCK / UNLOCK ======================
-function updateLockState() {
-  const cards = document.querySelectorAll('.box-card');
-  cards.forEach((card, i) => {
-    // Already completed
-    if (completedMask & (1<<i)) {
-      card.classList.add('done');
-      return;
+  for(let j=0;j<V;j++){
+    const box=document.createElement('div'); box.className='box';
+    if(j<all.length){
+      const i=all[j]; const item=items[i];
+      box.dataset.idx=i;
+      if(completed&(1<<i)){
+        box.className='box opened done';
+        box.innerHTML=`<div class="box-inner"><div class="face face-front"><div class="gift">🎁</div></div><div class="face face-back"><div class="r-emoji">${item.emoji}</div><div class="r-text">${item.text}</div></div></div>`;
+        box.addEventListener('click',()=>{completed^=(1<<i);item.done=!!(completed&(1<<i));save(tk(),{date:tk(),items,allDone:completed===((1<<T)-1)});render();updSidebar();updStatus()});
+      }else{
+        box.id='box-'+i;
+        box.innerHTML=`<div class="box-inner"><div class="face face-front"><div class="gift">🎁</div><div class="hint">👆 点我打开</div></div><div class="face face-back"><div class="r-emoji">${item.emoji}</div><div class="r-text">${item.text}</div></div></div>`;
+        box.addEventListener('click',()=>open(i,box));
+      }
+    }else{
+      box.className='box done';
+      box.innerHTML=`<div class="box-inner"><div class="face face-front"><div class="gift" style="font-size:28px">🏆</div></div></div>`;
     }
-    // Active task (opened but not completed)
-    if (i === currentTaskIndex) {
-      card.classList.add('opened');
-      card.classList.remove('locked');
-      return;
-    }
-    // Locked because another task is in progress
-    if (currentTaskIndex >= 0 && !(completedMask & (1<<i))) {
-      card.classList.add('locked');
-    } else {
-      card.classList.remove('locked');
-    }
+    g.appendChild(box);
+  }
+  updLocks();
+}
+
+function updLocks(){
+  document.querySelectorAll('.box').forEach(b=>{
+    const i=parseInt(b.dataset.idx); if(isNaN(i)||(completed&(1<<i))) return;
+    if(i===current) return;
+    if(current>=0) b.classList.add('locked'); else b.classList.remove('locked');
   });
 }
 
-function canOpenBox(index) {
-  if (completedMask & (1<<index)) return false; // already completed
-  if (index === currentTaskIndex) return false;  // already opened
-  if (currentTaskIndex >= 0) return false;       // another task in progress
-  if (globalLocked) return false;
+// ====================== SIDEBAR ======================
+function updSidebar(){
+  const sb=document.getElementById('sbList');
+  const opened=items.filter(t=>t.done).length;
+  if(opened===0){sb.innerHTML='<div class="sb-empty">🎁 还没开盲盒哦～</div>';return}
+  sb.innerHTML=items.map((t,i)=>{
+    if(!t.done) return '';
+    const tm=t.time?` ⏱${Math.floor(t.time/60)}:${String(t.time%60).padStart(2,'0')}`:'';
+    return `<div class="sb-item done" onclick="toggleItem(${i})" title="点击切换完成状态">
+      <span class="sbi-emoji">✅</span>
+      <span class="sbi-text">${t.text.replace(/\n/g,'<br>')}</span>
+      <span class="sbi-time">${tm}</span>
+      <span class="sbi-check">✅</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleItem(i){
+  completed^=(1<<i); items[i].done=!!(completed&(1<<i));
+  save(tk(),{date:tk(),items,allDone:completed===((1<<T)-1)});
+  render(); updSidebar(); updStatus();
+}
+
+// ====================== STATUS ======================
+function updStatus(){
+  const tag=document.getElementById('statusTag');
+  const done=completed===((1<<T)-1);
+  const cnt=items.filter(t=>t.done).length;
+  if(done){tag.textContent='🏆 今日 10 个盲盒全部完成！太棒啦！';tag.style.background='#d4f5d4';tag.style.color='#4a4'}
+  else if(current>=0&&timerInt){tag.textContent='⏱️ 正在计时中...';tag.style.background='#fff0d0';tag.style.color='#e8a010'}
+  else if(cnt===0){tag.textContent='🎯 试试手气，看看今天抽到什么！';tag.style.background='#ffe0e0';tag.style.color='#d44'}
+  else{tag.textContent=`✨ 已完成 ${cnt} 个，还剩 ${T-cnt} 个盲盒`;tag.style.background='#ffe0e0';tag.style.color='#d44'}
+}
+
+// ====================== OPEN & TIMER ======================
+function canOpen(i){
+  if(completed&(1<<i)) return false;
+  if(i===current||current>=0||locked) return false;
   return true;
 }
-
-// ====================== OPEN BOX ======================
-function openBox(index, card) {
-  if (!canOpenBox(index)) return;
-
-  const item = revealedItems[index];
-  globalLocked = true;
-  currentTaskIndex = index;
-  card.classList.add('shaking');
-
-  // During shake, fill back face
-  setTimeout(() => {
-    const back = card.querySelector('.box-back');
-    back.querySelector('.result-emoji').textContent = item.emoji;
-    back.querySelector('.result-text').textContent = item.text;
-    const tag = back.querySelector('.result-tag');
-    tag.textContent = item.tag;
-    tag.className = 'result-tag ' + item.tagClass;
-  }, 280);
-
-  // After shake, flip
-  setTimeout(() => {
-    card.classList.remove('shaking');
-    card.classList.add('opened');
-    updateLockState();
-
-    const rect = card.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    spawnSparkles(cx, cy);
-    spawnConfetti();
-
-    setTimeout(() => showTaskPopup(item, index), 600);
-  }, 520);
+function open(i,box){
+  if(!canOpen(i)) return;
+  locked=true; current=i;
+  box.classList.add('shaking');
+  setTimeout(()=>{
+    box.classList.remove('shaking'); box.classList.add('opened');
+    updLocks(); updStatus();
+    const r=box.getBoundingClientRect();
+    spawnFX(r.left+r.width/2,r.top+r.height/2);
+    setTimeout(()=>showReady(items[i],i),600);
+  },520);
+}
+function showReady(item,i){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='readyPopup';
+  ov.innerHTML=`<div class="popup">
+    <span class="o-emoji">${item.emoji}</span>
+    <div class="o-text">${item.text.replace(/\n/g,'<br>')}</div>
+    <div class="o-note">准备开始了吗？</div>
+    <button class="btn btn-start" onclick="startTimer(${i})">⏱️ 开始计时</button>
+    <button class="btn btn-later" onclick="skipTimer(${i})">等会儿再说</button>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function startTimer(i){
+  const ov=document.getElementById('readyPopup'); if(ov)ov.remove();
+  timerSec=0; current=i; locked=true;
+  timerInt=setInterval(()=>{
+    timerSec++;
+    const el=document.getElementById('timerDisplay');
+    if(el) el.textContent=fmtTime(timerSec);
+  },1000);
+  updStatus();
+  // Show timer popup
+  const ov2=document.createElement('div');ov2.className='overlay';ov2.id='timerPopup';
+  ov2.innerHTML=`<div class="popup">
+    <span class="o-emoji">⏱️</span>
+    <div class="o-timer" id="timerDisplay">00:00</div>
+    <div class="o-note">加油！计时中...</div>
+    <button class="btn btn-done" onclick="stopTimer(${i})">✅ 我完成啦</button>
+  </div>`;
+  document.body.appendChild(ov2);
+}
+function skipTimer(i){
+  const ov=document.getElementById('readyPopup'); if(ov)ov.remove();
+  completed|=(1<<i); items[i].done=true; items[i].time=0;
+  current=-1; locked=false;
+  save(tk(),{date:tk(),items,allDone:completed===((1<<T)-1)});
+  render(); updSidebar(); updStatus();
+  if(completed===((1<<T)-1)) setTimeout(()=>showAllDone(),500);
+}
+function stopTimer(i){
+  clearInterval(timerInt); timerInt=null;
+  const ov=document.getElementById('timerPopup'); if(ov)ov.remove();
+  completed|=(1<<i); items[i].done=true; items[i].time=timerSec;
+  current=-1; locked=false; timerSec=0;
+  save(tk(),{date:tk(),items,allDone:completed===((1<<T)-1)});
+  render(); updSidebar(); updStatus();
+  if(completed===((1<<T)-1)) setTimeout(()=>showAllDone(),500);
+}
+function fmtTime(s){const m=Math.floor(s/60),sec=s%60;return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')}
+function showAllDone(){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='allDone';
+  ov.innerHTML=`<div class="popup"><span class="o-emoji">🏆</span><div class="o-text">太棒啦！<br>今天的任务全部完成！</div><div class="o-note">明天再来开盲盒哦～</div><button class="btn btn-start" onclick="document.getElementById('allDone').remove()">🎉 知道啦</button></div>`;
+  document.body.appendChild(ov);
 }
 
-// ====================== TASK POPUP ======================
-function showTaskPopup(item, index) {
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-  overlay.id = 'taskOverlay';
+// ====================== FX ======================
+function spawnFX(cx,cy){
+  const e=['✨','⭐','💫','🌟','💖','🎉','🪄','🔮'];
+  for(let i=0;i<10;i++){const s=document.createElement('div');s.className='spark';s.textContent=e[Math.floor(Math.random()*e.length)];s.style.left=cx+'px';s.style.top=cy+'px';s.style.setProperty('--dx',(Math.random()-.5)*220+'px');s.style.setProperty('--dy',(Math.random()-.5)*220-50+'px');s.style.animationDelay=Math.random()*.1+'s';s.style.animationDuration=(.5+Math.random()*.4)+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),900)}
+  const c=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff8e53','#ff69b4','#a18cd1','#fbc2eb'];
+  for(let i=0;i<30;i++){const p=document.createElement('div');p.className='confetti';p.textContent=['■','●','▲','★','♦','♥'][Math.floor(Math.random()*6)];p.style.left=Math.random()*100+'%';p.style.top=-(10+Math.random()*25)+'px';p.style.color=c[Math.floor(Math.random()*c.length)];p.style.fontSize=(7+Math.random()*11)+'px';p.style.animationDelay=Math.random()*.4+'s';p.style.animationDuration=(1.2+Math.random()*1.4)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),2300)}
+}
 
-  const noteMap = {
-    learn: '加油！认真完成后点按钮 ✨',
-    fun: '开心地玩吧！结束后点按钮 🎉',
-    reward: '哇！太幸运了！🎊'
-  };
-
-  overlay.innerHTML = `
-    <div class="overlay-card">
-      <span class="big-emoji">${item.emoji}</span>
-      <div class="big-text">${item.text.replace(/\n/g,'<br>')}</div>
-      <div class="big-note">${noteMap[item.group]}</div>
-      <button class="btn-done" onclick="completeTask(${index})">我完成啦！✅</button>
+// ====================== HISTORY & STATS ======================
+function showHistory(){
+  const recs=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('bb_')){try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.items)recs.push(d)}catch(e){}}}
+  recs.sort((a,b)=>b.date.localeCompare(a.date));
+  let h='<div class="panel"><h3>📅 历史记录</h3>';
+  if(!recs.length) h+='<p style="text-align:center;color:#ccc">暂无记录</p>';
+  for(const r of recs.slice(0,30)){const dc=(r.items||[]).filter(t=>t.done).length;h+=`<div class="day-block"><div class="day-date">${r.date===tk()?'⭐ ':''}${r.date} — ${dc}/${r.items.length}</div><div class="day-items">${(r.items||[]).map(t=>`<span class="day-item${t.done?' ok':''}">${t.emoji} ${t.text.replace(/\\n/g,' ').slice(0,8)}</span>`).join('')}</div></div>`}
+  h+='<button class="close-btn" onclick="this.parentElement.parentElement.remove()">关闭</button></div>';
+  const ov=document.createElement('div');ov.className='modal';ov.innerHTML=h;ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});document.body.appendChild(ov);
+}
+function showStats(){
+  const recs=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('bb_')){try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.items)recs.push(d)}catch(e){}}}
+  const st={};let totO=0,totC=0;for(const r of recs)for(const t of r.items||[]){const n=t.text.replace(/\n/g,' ');if(!st[n])st[n]={e:t.emoji,o:0,d:0};st[n].o++;totO++;if(t.done){st[n].d++;totC++}}
+  const sorted=Object.entries(st).sort((a,b)=>b[1].o-a[1].o);
+  let h=`<div class="panel"><h3>📊 学习统计</h3><p style="text-align:center;color:#8b5e3c;font-size:13px;margin-bottom:6px">📅 ${recs.length} 天 | 开盒 ${totO} 次 | 完成 ${totC} 次 | ${totO>0?Math.round(totC/totO*100):0}%</p><div style="max-height:55vh;overflow-y:auto">`;
+  for(const[n,s] of sorted){const pct=s.o>0?Math.round(s.d/s.o*100):0;const bc=pct>=80?'#6bcb77':pct>=50?'#ffd93d':'#ff8e53';h+=`<div class="stat-row"><span class="s-emoji">${s.e}</span><div class="s-info"><div class="s-name">${n}</div><div class="s-bar"><div class="s-bar-bg"><div class="s-bar-fg" style="width:${pct}%;background:${bc}"></div></div><span class="s-pct">${s.d}/${s.o} (${pct}%)</span></div></div></div>`}
+  h+=`</div><div style="display:flex;gap:8px;margin-top:8px"><button class="close-btn" style="flex:1;background:#4d96ff" onclick="exportCSV();document.querySelector('.modal')?.remove()">📥 导出</button><button class="close-btn" style="flex:1" onclick="this.parentElement.parentElement.parentElement.remove()">关闭</button></div></div>`;
+  const ov=document.createElement('div');ov.className='modal';ov.innerHTML=h;ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});document.body.appendChild(ov);
+}
+function exportCSV(){
+  const recs=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('bb_')){try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.items)recs.push(d)}catch(e){}}}
+  recs.sort((a,b)=>a.date.localeCompare(b.date));
+  let csv='日期,任务,类别,是否完成,用时(秒)\n';for(const r of recs)for(const t of r.items||[])csv+=`${r.date},"${t.text.replace(/\n/g,' ')}","${t.tag||''}",${t.done?'是':'否'},${t.time||''}\n`;
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`盲盒记录_${tk()}.csv`;a.click();
+}
+function resetToday(){
+  // Generate random 2-digit × 1-digit multiplication
+  const a=Math.floor(Math.random()*80)+11; // 11~90
+  const b=Math.floor(Math.random()*8)+2;   // 2~9
+  const answer=a*b;
+  const ov=document.createElement('div');ov.className='overlay';ov.id='resetPopup';
+  ov.innerHTML=`<div class="popup">
+    <span class="o-emoji">🧮</span>
+    <div class="o-text">家长验证</div>
+    <div style="font-size:28px;font-weight:900;color:#6b4226;margin:12px 0">${a} × ${b} = ？</div>
+    <input type="number" id="resetAnswer" style="width:120px;padding:10px;font-size:22px;text-align:center;border:2px solid #ddd;border-radius:12px;font-family:inherit" placeholder="?">
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-done" style="flex:1" onclick="checkReset(${answer})">确认重置</button>
+      <button class="btn btn-later" style="flex:1;color:#666" onclick="document.getElementById('resetPopup').remove()">取消</button>
     </div>
-  `;
-
-  document.body.appendChild(overlay);
+    <div id="resetError" style="color:#e44;font-size:13px;margin-top:6px;display:none">❌ 答案不对哦，再算一次</div>
+  </div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>{const inp=document.getElementById('resetAnswer');inp?.focus();inp?.addEventListener('keydown',e=>{if(e.key==='Enter')checkReset(answer)});},300);
 }
-
-function completeTask(index) {
-  const overlay = document.getElementById('taskOverlay');
-  if (overlay) {
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.25s';
-    setTimeout(() => overlay.remove(), 250);
+function checkReset(ans){
+  const inp=document.getElementById('resetAnswer');
+  const val=parseInt(inp?.value);
+  if(val===ans){
+    document.getElementById('resetPopup')?.remove();
+    const k=tk();items=draw10();items.forEach(t=>{t.done=false;t.time=0});save(k,{date:k,items,allDone:false});
+    completed=0;current=-1;locked=false;timerSec=0;if(timerInt){clearInterval(timerInt);timerInt=null}
+    render();updSidebar();updStatus();
+  }else{
+    const err=document.getElementById('resetError');if(err)err.style.display='block';
+    if(inp)inp.value='';inp?.focus();
   }
-
-  completedMask |= (1<<index);
-  currentTaskIndex = -1;
-  globalLocked = false;
-  updateLockState();
-
-  // Celebration for completing
-  const card = document.getElementById(`box-${index}`);
-  if (card) {
-    const rect = card.getBoundingClientRect();
-    spawnSparkles(rect.left+rect.width/2, rect.top+rect.height/2);
-  }
-
-  // All done?
-  if (completedMask === (1<<TOTAL_BOXES)-1) {
-    setTimeout(() => showAllDone(), 600);
-  }
-}
-
-function showAllDone() {
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-  overlay.id = 'allDoneOverlay';
-  overlay.innerHTML = `
-    <div class="overlay-card">
-      <span class="big-emoji">🏆</span>
-      <div class="big-text">太棒啦！<br>今天的任务全部完成！</div>
-      <div class="big-note">明天再来开盲盒哦～</div>
-      <button class="btn-done" style="background:linear-gradient(135deg,#ff6b6b,#ff8e53)"
-              onclick="resetGame()">🔄 再开一轮</button>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-}
-
-// ====================== EFFECTS ======================
-function spawnSparkles(cx, cy) {
-  const emojis = ['✨','⭐','💫','🌟','💖','🎉','🪄','🔮'];
-  for (let i=0;i<14;i++) {
-    const s = document.createElement('div');
-    s.className='sparkle-burst';
-    s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
-    s.style.left=cx+'px'; s.style.top=cy+'px';
-    s.style.setProperty('--dx',(Math.random()-0.5)*260+'px');
-    s.style.setProperty('--dy',(Math.random()-0.5)*260-80+'px');
-    s.style.animationDelay=Math.random()*0.12+'s';
-    s.style.animationDuration=(0.6+Math.random()*0.5)+'s';
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(),1100);
-  }
-}
-
-function spawnConfetti() {
-  const container = document.getElementById('confetti') || document.body;
-  const colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff8e53','#ff69b4',
-                  '#a18cd1','#fbc2eb','#84fab0','#ff9a9e','#fad0c4','#a1c4fd'];
-  const shapes = ['■','●','▲','★','♦','♥'];
-  for (let i=0;i<50;i++) {
-    const p = document.createElement('div');
-    p.className='confetti-piece';
-    p.textContent=shapes[Math.floor(Math.random()*shapes.length)];
-    p.style.left=Math.random()*100+'%';
-    p.style.top=-(10+Math.random()*35)+'px';
-    p.style.color=colors[Math.floor(Math.random()*colors.length)];
-    p.style.fontSize=(9+Math.random()*14)+'px';
-    p.style.animationDelay=Math.random()*0.5+'s';
-    p.style.animationDuration=(1.4+Math.random()*1.8)+'s';
-    container.appendChild(p);
-    setTimeout(()=>p.remove(),2800);
-  }
-}
-
-// ====================== RESET ======================
-function resetGame() {
-  document.getElementById('confetti') && (document.getElementById('confetti').innerHTML='');
-  ['taskOverlay','allDoneOverlay'].forEach(id=>{
-    const el=document.getElementById(id); if(el)el.remove();
-  });
-  initGame();
 }
 
 // ====================== START ======================
-initGame();
-
-// PWA Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
-
-// Prevent double-tap zoom and text selection on iPad
-document.addEventListener('touchstart', function(){}, {passive:true});
-document.body.style.webkitTouchCallout = 'none';
-document.body.style.webkitUserSelect = 'none';
-document.body.style.userSelect = 'none';
+init(); if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
